@@ -1,28 +1,28 @@
 import os
 from carte_bingo import CreateurCarte
 import pickle
-from typing import List, Tuple
 from prettytable import PrettyTable
 from datetime import datetime
+from custom_types import BASE_DONNE, COMMANDE
+from jolie_pdf import PdfCreator
 
 
 class GestionnaireCarte:
-    BD_TYPE = List[Tuple[str, CreateurCarte.Carte]]
     OUI = {"oui", "yes", "o", "y"}
     CHEMIN_SAUVEGARDE = "cartes_crees/base_données_cartes.pkl" 
 
     def __init__(self) -> None:
-        self.commande = []
+        self.commande:COMMANDE = []
 
         # Vérifier si le fichier de base de données de carte existe:
         if not os.path.isfile(GestionnaireCarte.CHEMIN_SAUVEGARDE):
-            self.base_données: GestionnaireCarte.BD_TYPE = []
+            self.base_données: BASE_DONNE = []
             liste_clients = []
             liste_cartes = []
         else:
             # Ouvrir la base de données des cartes sauvegardées
             with open(GestionnaireCarte.CHEMIN_SAUVEGARDE, "rb") as f:
-                self.base_données: GestionnaireCarte.BD_TYPE = pickle.load(f)
+                self.base_données: BASE_DONNE = pickle.load(f)
             liste_clients, liste_cartes = zip(*self.base_données)
             print(f"Il y a actuellement {len(set(liste_clients))} clients.")
             print(f"Il y a actuellement {len(liste_cartes)} cartes de bingo")
@@ -46,6 +46,10 @@ class GestionnaireCarte:
             print("Commande sauvegardée")
         else:
             print("Commande annulée")
+            return
+            
+        print("Création des carte en format pdf")
+        PdfCreator.gestionnaire_commande(self.commande, self.base_données)
 
     def demande_cartes(self):
         """Gestion d'une commande individuelle de carte"""
@@ -54,14 +58,15 @@ class GestionnaireCarte:
             nombre_cartes = int(
                 input("Entrez le nombre de cartes à générer:\n"))
         except KeyboardInterrupt:
-            continuer = input("\nEntrée annulée.")
+            continuer = print("\nEntrée annulée.")
             return False
 
         self.commande.append((client, nombre_cartes))
         for i in range(nombre_cartes):
             self.base_données.append(
                 (client, CreateurCarte.nouvelle_carte(self.set_cartes)))
-        return input("Entrer d'autre commandes?\n").lower() in GestionnaireCarte.OUI
+        return True
+        # return input("Entrer d'autre commandes?\n").lower() in GestionnaireCarte.OUI
 
 
 GestionnaireCarte()

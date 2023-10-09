@@ -1,11 +1,11 @@
 from random import random
 from typing import Tuple,Set
+from custom_types import CARTE
 
 class CreateurCarte:   
-    Carte = Tuple[Tuple[str, Tuple[int]],...]
 
     @classmethod
-    def nouvelle_carte(cls, base_donnes:Set[Carte]):
+    def nouvelle_carte(cls, base_donnes:Set[CARTE]):
         for i in range(1000):
             nouvelle_carte = cls._creer_carte()
             if  cls.verifier_si_carte_existante(base_donnes, nouvelle_carte):
@@ -29,6 +29,6 @@ class CreateurCarte:
         return tuple(pool.pop(round((len(pool)-1)*random())) for i in range(number_of_number))
     
     @staticmethod
-    def verifier_si_carte_existante(base_donnees:Set[Carte], nouvelle_carte:Carte):
+    def verifier_si_carte_existante(base_donnees:Set[CARTE], nouvelle_carte:CARTE):
         return not nouvelle_carte in base_donnees
 
