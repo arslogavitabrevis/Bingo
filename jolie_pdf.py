@@ -5,6 +5,7 @@ import os
 from datetime import datetime
 import shutil
 from time import sleep
+from math import floor
 
 
 class PdfCreator:
@@ -53,7 +54,7 @@ class PdfCreator:
 \\usepackage[thinlines]{{easytable}}
 \\usepackage[margin=0.5in]{{geometry}}
 
-\\title{{Cartes de bingo de {}}}
+\\title{{Cartes de BINGO de {}}}
 \\begin{{document}}
 
 \\maketitle
@@ -65,17 +66,22 @@ class PdfCreator:
 
     @staticmethod
     def __remplisseur_cartes(cartes: List[CARTE]) -> str:
-        return "\n".join([PdfCreator.__remplisseur_carte(carte) for carte in cartes])
+        cartes_tex = [PdfCreator.__remplisseur_carte(carte) for carte in cartes]
+        ligne_carte_tex = [" ".join((cartes_tex[i*2], cartes_tex[i*2+1])) for i in range(floor(len(cartes_tex)/2))]
+        if len(cartes_tex)%2 !=0:
+            ligne_carte_tex.append(cartes_tex[-1])
+            
+        return "\n\n".join(ligne_carte_tex)
 
     @staticmethod
     def __remplisseur_carte(carte: CARTE) -> str:
         numéro = [numero for _, numeros in carte
                   for numero in numeros]
-        return """\\begin{{TAB}}(e,1.5cm,1.5cm){{|c:c:c:c:c|}}{{|c|c:c:c:c:c|}}
-B & I & N & G & O \\\\
+        return """\\begin{{TAB}}(e,1.6cm,1.6cm){{|c:c:c:c:c|}}{{|c|c:c:c:c:c|}}
+{{\\Huge B \\par}} & {{\\Huge I \\par}} & {{\\Huge N \\par}} & {{\\Huge G \\par}} & {{\\Huge O \\par}} \\\\
  {0} & {5} & {10} & {14} & {19} \\\\
  {1} & {6} & {11} & {15} & {20} \\\\
- {2} & {7} & Gratuit & {16} & {21} \\\\
+ {2} & {7} & {{\\Large Gratuit \\par}} & {16} & {21} \\\\
  {3} & {8} & {12} & {17} & {22} \\\\
  {4} & {9} & {13} & {18} &  {23}   
 \end{{TAB}}""".format(*numéro)
