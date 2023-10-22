@@ -1,11 +1,9 @@
 from custom_types import COMMANDE, BASE_DONNE, CARTE
 from typing import List
 from pdflatex import PDFLaTeX
-import os
 from datetime import datetime
-import shutil
-from time import sleep
 from math import floor
+from random import random
 
 
 class PdfCreator:
@@ -32,10 +30,7 @@ class PdfCreator:
                 pdfl = PDFLaTeX.from_binarystring(f.read(), f"cartes_pdf/{client}{date}")
 
                 pdf, log, completed_process = pdfl.create_pdf(
-                keep_pdf_file=True, keep_log_file=False)
-                
-
-            # shutil.copy(f"{file_name.split('.')[0]}.pdf",f"cartes_pdf/{client}{date}.pdf")
+                keep_pdf_file=True, keep_log_file=False)      
 
     @staticmethod
     def __create_latex_string(nom_client: str, nombre_carte: int, base_donnée: BASE_DONNE) -> str:
@@ -51,15 +46,18 @@ class PdfCreator:
                 "Nom du client incorrect dans la base de donnée simplifiée")
 
         return """\\documentclass{{article}}
-\\usepackage[thinlines]{{easytable}}
+\\usepackage{{xcolor}}
+\\usepackage{{tabularray}}
 \\usepackage[margin=0.5in]{{geometry}}
 
-\\title{{Cartes de BINGO de {}}}
+\\title{{BINGO  {{\\Huge Énergi-sant!}}}}
 \\begin{{document}}
 
 \\maketitle
 \\huge
 \\begin{{center}}
+Cartes de {}
+
 {}
 \\end{{center}}
 \\end{{document}}""".format(nom_client, PdfCreator.__remplisseur_cartes(cartes))
@@ -77,11 +75,21 @@ class PdfCreator:
     def __remplisseur_carte(carte: CARTE) -> str:
         numéro = [numero for _, numeros in carte
                   for numero in numeros]
-        return """\\begin{{TAB}}(e,1.6cm,1.6cm){{|c:c:c:c:c|}}{{|c|c:c:c:c:c|}}
-{{\\Huge B \\par}} & {{\\Huge I \\par}} & {{\\Huge N \\par}} & {{\\Huge G \\par}} & {{\\Huge O \\par}} \\\\
+        
+        couleurs = ["blue","red","green","cyan","magenta","yellow","lime","olive","orange","pink","purple","teal","violet",]
+        couleur_choisies = [couleurs.pop(round(random()*len(couleurs))-1) for i in range(len("BINGO"))] 
+        return """\\begin{{tblr}}{{
+    hlines={{0.7pt, solid}}, vlines={{0.7pt, solid}},
+    hline{{2-Y}} = {{0.5pt, solid}},
+    colspec={{ccccc}}, rows={{18mm}}, columns={{18mm}},
+    rowsep=0mm, colsep=0mm, stretch=0mm,
+}}
+\\SetCell{{{24}!{trs}}}{{\\Huge B \\par}} & \\SetCell{{{25}!{trs}}}{{\\Huge I \\par}} & \\SetCell{{{26}!{trs}}}{{\\Huge N \\par}} & \\SetCell{{{27}!{trs}}}{{\\Huge G \\par}} & \\SetCell{{{28}!{trs}}}{{\\Huge O \\par}} \\\\
  {0} & {5} & {10} & {14} & {19} \\\\
  {1} & {6} & {11} & {15} & {20} \\\\
- {2} & {7} & {{\\Large Gratuit \\par}} & {16} & {21} \\\\
+ {2} & {7} & \\SetCell{{blue!25}}{{\\Large Gratuit \\par}} & {16} & {21} \\\\
  {3} & {8} & {12} & {17} & {22} \\\\
- {4} & {9} & {13} & {18} &  {23}   
-\end{{TAB}}""".format(*numéro)
+ {4} & {9} & {13} & {18} &  {23}    
+\end{{tblr}}""".format(*numéro, *couleur_choisies, trs = 55)
+
+
