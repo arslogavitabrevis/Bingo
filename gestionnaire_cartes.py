@@ -121,6 +121,8 @@ class GestionnaireCarte:
         
         commande_csv = pd.read_csv(f"{self.__dossier_csv}/{self.__fichier_csv_commande}")
         nouvelle_bd:pd.DataFrame = pd.concat([bd_csv_commandes,commande_csv])
+        montant_total = nouvelle_bd["Montant don"].sum()
+        print(f"Le montant total amassé est de {montant_total} $.")
 
         os.rename(f"{self.__dossier_csv}/{self.__fichier_csv_commande}",
                   f"{self.__dossier_csv}/archive/{chemin_splité}{self.date}.csv")
