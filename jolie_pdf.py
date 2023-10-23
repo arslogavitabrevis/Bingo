@@ -12,11 +12,11 @@ class PdfCreator:
     def gestionnaire_commande(cls, commandes: COMMANDES, base_donnée: BASE_DONNE):
         nombres_cartes = [c.nombre_cartes for c in commandes]
         date = datetime.now().strftime('%Y-%m-%d_%H:%M:%S')
-        fichier_pdfs: List[RetourCommande] = []
+        retours_commandes: List[RetourCommande] = []
         for i, commande in enumerate(commandes):
 
-            file_name = "cartes_pdf/creation_carte_pdf/_temp.tex"
-            with open(file_name, "wb") as f:
+            temp_file_name = "cartes_pdf/creation_carte_pdf/_temp.tex"
+            with open(temp_file_name, "wb") as f:
                 idx_carte = -1*sum(nombres_cartes[i:])
                 if idx_carte == -1*nombres_cartes[i]:
                     bd_simplifié = base_donnée[idx_carte:]
@@ -26,17 +26,17 @@ class PdfCreator:
                 f.write(cls.__create_latex_string(
                     commande.nom_client, commande.nombre_cartes, bd_simplifié).encode())
 
-            with open(file_name, 'rb') as f:
+            with open(temp_file_name, 'rb') as f:
                 chemin_fichier_pdf = f"cartes_pdf/{commande.nom_client}{date}"
                 pdfl = PDFLaTeX.from_binarystring(f.read(), chemin_fichier_pdf)
 
                 pdf, log, completed_process = pdfl.create_pdf(
                     keep_pdf_file=True, keep_log_file=False)
-            fichier_pdfs.append(
+            retours_commandes.append(
                 RetourCommande(
-                    commande=commande, fichier_pdf=chemin_fichier_pdf))
+                    commande=commande, fichier_pdf=f"{chemin_fichier_pdf}.pdf"))
 
-        return fichier_pdfs
+        return retours_commandes
 
     @staticmethod
     def __create_latex_string(nom_client: str, nombre_carte: int, base_donnée: BASE_DONNE) -> str:
