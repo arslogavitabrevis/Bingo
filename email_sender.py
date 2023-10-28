@@ -15,17 +15,17 @@ class EmailSender:
     def envoyer_email(self, retour_commande: RetourCommande):
         contents = ["""Bonjour {},
 
-Nous vous remercions pour votre don de {} $ à centraide. Vous trouverez en pièce jointe vos {} cartes de bingo!
+Nous vous remercions pour votre don de {} $ à la campagne Entraide. Vous trouverez en pièce jointe vos {} cartes de bingo!
 
 Bonne chance!
 
-L\'équipe du Bingo Énergi-sant""".format(
+L\'équipe du Bingo Énergi-sant, Claudia Dupont, Josélie Bégin, Julie Poulin, Maude Grenier-Hamel, Raphaël Grenier""".format(
             retour_commande.commande.nom_client,
             retour_commande.commande.montant_don,
             retour_commande.commande.nombre_cartes,
         )]
 
-        self.yag.send(to=[retour_commande.commande.adressse_courriel],
+        self.yag.send(to=[*retour_commande.commande.adressse_courriel.split(";")],
                       subject='Vos cartes de bingo Énergi-sant!',
                       cc=[self.__courriel_reference],
                       contents=contents,

@@ -3,13 +3,14 @@ from carte_bingo import CreateurCarte
 import pickle
 from prettytable import PrettyTable
 from datetime import datetime
-from custom_types import BASE_DONNE, COMMANDES, Commande
+from custom_types import BASE_DONNE, COMMANDES, Commande, CARTE
 from jolie_pdf import PdfCreator
 from email_sender import EmailSender
 from typing import List, Tuple
 from copy import deepcopy
 import pandas as pd
 import shutil
+from pattern_adresse_courriel import pattern_adresse_courriel
 
 
 class GestionnaireCarte:
@@ -22,14 +23,16 @@ class GestionnaireCarte:
         # Vérifier si le fichier de base de données de carte existe:
         if not os.path.isfile(GestionnaireCarte.CHEMIN_SAUVEGARDE):
             self.base_données: BASE_DONNE = []
-            liste_clients = []
-            liste_cartes = []
+            liste_commandes_précédentes: List[Commande] = []
+            liste_cartes: List[CARTE] = []
         else:
             # Ouvrir la base de données des cartes sauvegardées
             with open(GestionnaireCarte.CHEMIN_SAUVEGARDE, "rb") as f:
                 self.base_données: BASE_DONNE = pickle.load(f)
-            liste_clients, liste_cartes = zip(*self.base_données)
-            print(f"Il y a actuellement {len(set(liste_clients))} clients.")
+            liste_commandes_précédentes, liste_cartes = zip(*self.base_données)
+            clients = set(
+                [commande_précédente.nom_client for commande_précédente in liste_commandes_précédentes])
+            print(f"Il y a actuellement {len(clients)} clients.")
             print(f"Il y a actuellement {len(liste_cartes)} cartes de bingo")
         self.set_cartes = set(liste_cartes)
 
@@ -67,27 +70,29 @@ class GestionnaireCarte:
             self.email_sender.envoyer_email(retour_commande)
         self.archiver_comande()
         print("Envois Complété")
-        
-    def ajout_cartes(self, client, nombre_cartes):
+
+    def ajout_cartes(self, commande, nombre_cartes):
         for i in range(nombre_cartes):
             self.base_données.append(
-                (client, CreateurCarte.nouvelle_carte(self.set_cartes)))
-            
+                (commande, CreateurCarte.nouvelle_carte(self.set_cartes)))
+
     def demande_cartes_manuel(self):
         """Gestion d'une commande individuelle de carte"""
         try:
-            client = input("Entrer le nom du client:\n")
+            nom_client = input("Entrer le nom du client:\n")
             montant_don = int(
                 input("Entrez le montant du don:\n"))
         except KeyboardInterrupt:
             continuer = print("\nEntrée annulée.")
             return False
         nombre_cartes = self.conversion_don_nombre_cartes(montant_don)
-        self.commande.append(Commande(nom_client=client,
-                                      adressse_courriel="",
-                                      montant_don=montant_don,
-                                      nombre_cartes=nombre_cartes))
-        self.ajout_cartes(client, nombre_cartes)
+        commande = Commande(
+            nom_client=nom_client,
+            adressse_courriel=pattern_adresse_courriel(nom_client),
+            montant_don=montant_don,
+            nombre_cartes=nombre_cartes)
+        self.commande.append(commande)
+        self.ajout_cartes(commande, nombre_cartes)
         return True
 
     def lecture_csv_entre(self):
@@ -95,32 +100,35 @@ class GestionnaireCarte:
         self.__dossier_csv = "commande"
         self.__fichier_csv_commande = "commande.csv"
 
-        commande_csv = pd.read_csv(f"{self.__dossier_csv}/{self.__fichier_csv_commande}")
+        commande_csv = pd.read_csv(
+            f"{self.__dossier_csv}/{self.__fichier_csv_commande}")
 
         # Ajouter les commandes
         for i, row in commande_csv.iterrows():
-            client = row["Nom client"]
+            nom_client = row["Nom client"]
             montant_don = row["Montant don"]
-            adresse_courriel = row["Adresse courriel"]
+            adresse_courriel = pattern_adresse_courriel(nom_client)
             nombre_cartes = self.conversion_don_nombre_cartes(montant_don)
-            self.commande.append(Commande(nom_client=client,
-                                          adressse_courriel=adresse_courriel,
-                                          montant_don=montant_don,
-                                          nombre_cartes=nombre_cartes))
-            self.ajout_cartes(client, nombre_cartes)
+            commande = Commande(nom_client=nom_client,
+                                adressse_courriel=adresse_courriel,
+                                montant_don=montant_don,
+                                nombre_cartes=nombre_cartes)
+            self.commande.append(commande)
+            self.ajout_cartes(commande, nombre_cartes)
 
     def archiver_comande(self):
         # Sauvegarder le document
         chemin_splité = self.__fichier_csv_commande.split(".")[0]
-        toute_les_commandes =f"{self.__dossier_csv}/archive/toute_les_commandes.csv"
+        toute_les_commandes = f"{self.__dossier_csv}/archive/toute_les_commandes.csv"
         if not os.path.isfile(toute_les_commandes):
             shutil.copy(f"{self.__dossier_csv}/modele.csv",
-                  toute_les_commandes)
-        
+                        toute_les_commandes)
+
         bd_csv_commandes = pd.read_csv(toute_les_commandes)
-        
-        commande_csv = pd.read_csv(f"{self.__dossier_csv}/{self.__fichier_csv_commande}")
-        nouvelle_bd:pd.DataFrame = pd.concat([bd_csv_commandes,commande_csv])
+
+        commande_csv = pd.read_csv(
+            f"{self.__dossier_csv}/{self.__fichier_csv_commande}")
+        nouvelle_bd: pd.DataFrame = pd.concat([bd_csv_commandes, commande_csv])
         montant_total = nouvelle_bd["Montant don"].sum()
         print(f"Le montant total amassé est de {montant_total} $.")
 
@@ -129,8 +137,7 @@ class GestionnaireCarte:
 
         nouvelle_bd.to_csv(toute_les_commandes)
         shutil.copy(toute_les_commandes,
-            f"{self.__dossier_csv}/archive/toute_les_commandes{self.date}.csv")
-
+                    f"{self.__dossier_csv}/archive/toute_les_commandes{self.date}.csv")
 
     @staticmethod
     def conversion_don_nombre_cartes(montant_don: float) -> int:
@@ -144,7 +151,6 @@ class GestionnaireCarte:
 
         table_prix: List[Tuple[float, int]] = sorted([
             # Prix $, Nombre de cartes
-            (3, 1),
             (5, 2),
             (10, 5),
             (20, 12),

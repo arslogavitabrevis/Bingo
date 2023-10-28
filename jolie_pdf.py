@@ -1,10 +1,10 @@
-from custom_types import COMMANDES, BASE_DONNE, CARTE, RetourCommande
+from custom_types import COMMANDES, BASE_DONNE, CARTE, RetourCommande, Commande
 from typing import List
 from pdflatex import PDFLaTeX
 from datetime import datetime
 from math import floor
 from random import random
-
+from typing import cast
 
 class PdfCreator:
 
@@ -45,8 +45,9 @@ class PdfCreator:
             ValueError(
                 "Nombre de carte incorrect dans la base de donnée simplifiée")
 
-        noms_clients, cartes = zip(*base_donnée)
-
+        commandes, cartes = zip(*base_donnée)
+        
+        noms_clients = [c.nom_client for c in cast(List[Commande], commandes)]
         if len(noms_clients) != 1 or nom_client not in noms_clients:
             ValueError(
                 "Nom du client incorrect dans la base de donnée simplifiée")
@@ -56,7 +57,7 @@ class PdfCreator:
 \\usepackage{{tabularray}}
 \\usepackage[margin=0.5in]{{geometry}}
 
-\\title{{BINGO  {{\\Huge Énergi-sant!}}}}
+\\title{{{{\\textbf{{BINGO {{\\Huge Énergi-sant!}}}}}}}}
 \\begin{{document}}
 
 \\maketitle

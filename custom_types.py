@@ -11,7 +11,7 @@ class RetourCommande(NamedTuple):
     fichier_pdf:str
 
 CARTE = Tuple[Tuple[str, Tuple[int]],...]
-BASE_DONNE = List[Tuple[str, CARTE]]
+BASE_DONNE = List[Tuple[Commande, CARTE]]
 COMMANDES = List[Commande]
 
 
