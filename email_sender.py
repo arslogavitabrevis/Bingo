@@ -24,8 +24,9 @@ L\'équipe du Bingo Énergi-sant, Claudia Dupont, Josélie Bégin, Julie Poulin,
             retour_commande.commande.montant_don,
             retour_commande.commande.nombre_cartes,
         )]
-
-        self.yag.send(to=[*retour_commande.commande.adressse_courriel.split(";")],
+        adresses = [adr for adr in retour_commande.commande.adressse_courriel.split(";")
+                    if adr != ""]
+        self.yag.send(to=adresses,
                       subject='Vos cartes de bingo Énergi-sant!',
                       cc=[self.__courriel_reference],
                       contents=contents,
