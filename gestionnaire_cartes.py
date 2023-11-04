@@ -10,7 +10,7 @@ from typing import List, Tuple
 from copy import deepcopy
 import pandas as pd
 import shutil
-from pattern_adresse_courriel import pattern_adresse_courriel
+from pattern_adresse_courriel import AdresseCourriel
 
 
 class GestionnaireCarte:
@@ -38,6 +38,8 @@ class GestionnaireCarte:
 
         print("Bienvenu dans le créateur de cartes.\n")
 
+        # Charger la liste des email:
+        self.touver_courriel = AdresseCourriel()
         # Partie pour faire des demande de carte manuellement
         # while self.demande_cartes_manuel():
         #     print("Les cartes seront générées seulement à la fin")
@@ -88,7 +90,7 @@ class GestionnaireCarte:
         nombre_cartes = self.conversion_don_nombre_cartes(montant_don)
         commande = Commande(
             nom_client=nom_client,
-            adressse_courriel=pattern_adresse_courriel(nom_client),
+            adressse_courriel=self.touver_courriel.pattern_adresse_courriel(nom_client),
             montant_don=montant_don,
             nombre_cartes=nombre_cartes)
         self.commande.append(commande)
@@ -107,7 +109,7 @@ class GestionnaireCarte:
         for i, row in commande_csv.iterrows():
             nom_client = row["Nom client"]
             montant_don = row["Montant don"]
-            adresse_courriel = pattern_adresse_courriel(nom_client)
+            adresse_courriel = self.touver_courriel.pattern_adresse_courriel(nom_client)
             nombre_cartes = self.conversion_don_nombre_cartes(montant_don)
             commande = Commande(nom_client=nom_client,
                                 adressse_courriel=adresse_courriel,
