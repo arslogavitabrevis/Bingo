@@ -8,10 +8,13 @@ class AdresseCourriel:
     __DOMAINE_SECONDAIRE = "@domain2.com"
     def __init__(self) -> None:
         with open(self.__FICHIERLISTECOURRIEL, "r") as f:
-            self.liste_courriels = set(f.read().split("\n"))
+            self.liste_courriels = set([c.lower()[1:-1] for c in f.read().split("\n")])
     
     def pattern_adresse_courriel(self, prénom_nom:str):
-        prénom,nom = prénom_nom.split(" ")
+        try:
+            prénom,nom = prénom_nom.split(" ")
+        except ValueError:
+            raise ValueError(f"Nom de famille composé pour {prénom_nom}")
         return f"{self.__pattern_economie(prénom, nom)};{prénom.lower()}.{nom.lower()}{self.__DOMAINE_SECONDAIRE};"
 
     def __pattern_economie(self, prénom:str, nom:str):
@@ -25,7 +28,7 @@ class AdresseCourriel:
                return match[0]
            elif len(match) >1:
                choix = "\n\t".join([f"{i} : {adr}" for i, adr in enumerate(match)])
-               return match[int(input(f"Choisir l'adresse pour {prénom} {nom}{chr(10)}{chr(9)}{choix}{chr(10)}"))][1:-1]
+               return match[int(input(f"Choisir l'adresse pour {prénom} {nom}{chr(10)}{chr(9)}{choix}{chr(10)}"))]
         else:
             return essaie 
     
