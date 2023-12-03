@@ -116,11 +116,18 @@ class GestionnaireCarte:
 
         # Ajouter les commandes
         for i, row in commande_csv.iterrows():
-            nom_client = row["Nom client"]
+            nom_participant:str = row["Nom client"]
+            
+            #Enlever les accents pour éviter que ça crée des bug à l'envois du courriel
+            for c in "éÉÈèëËêÊ":
+                if c in nom_participant:
+                    print(f"Le caractère {c} a été enlevé du nom {nom_participant}")
+                    nom_participant = nom_participant.replace(c, "e")                    
+                 
             montant_don = row["Montant don"]
-            adresse_courriel = self.touver_courriel.pattern_adresse_courriel(nom_client)
+            adresse_courriel = self.touver_courriel.pattern_adresse_courriel(nom_participant)
             nombre_cartes = self.conversion_don_nombre_cartes(montant_don)
-            commande = Commande(nom_client=nom_client,
+            commande = Commande(nom_client=nom_participant,
                                 adressse_courriel=adresse_courriel,
                                 montant_don=montant_don,
                                 nombre_cartes=nombre_cartes)
