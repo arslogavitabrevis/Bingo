@@ -23,27 +23,31 @@ class GestionnaireCarte:
         # Vérifier si le fichier de base de données de carte existe:
         if not os.path.isfile(GestionnaireCarte.CHEMIN_SAUVEGARDE):
             self.base_données: BASE_DONNE = []
-            liste_commandes_précédentes: List[Commande] = []
+            self.liste_commandes_précédentes: List[Commande] = []
             liste_cartes: List[CARTE] = []
         else:
             # Ouvrir la base de données des cartes sauvegardées
             with open(GestionnaireCarte.CHEMIN_SAUVEGARDE, "rb") as f:
                 self.base_données: BASE_DONNE = pickle.load(f)
-            liste_commandes_précédentes, liste_cartes = zip(*self.base_données)
+            self.liste_commandes_précédentes, liste_cartes = zip(*self.base_données)
             clients = set(
-                [commande_précédente.nom_client for commande_précédente in liste_commandes_précédentes])
+                [commande_précédente.nom_client for commande_précédente in self.liste_commandes_précédentes])
             print(f"Il y a actuellement {len(clients)} clients.")
             print(f"Il y a actuellement {len(liste_cartes)} cartes de bingo")
         self.set_cartes = set(liste_cartes)
 
         print("Bienvenu dans le créateur de cartes.\n")
 
+        # Définir  le nom du dossier pour les cartes
+        self.__dossier_csv = "commande"
+        
         # Charger la liste des email:
         self.touver_courriel = AdresseCourriel()
         # Partie pour faire des demande de carte manuellement
         # while self.demande_cartes_manuel():
         #     print("Les cartes seront générées seulement à la fin")
-
+    
+    def passer_commande(self):
         # Pour faire des demande de carte depuis le CSV
         self.lecture_csv_entre()
 
@@ -52,6 +56,18 @@ class GestionnaireCarte:
             "Nom client", "Adressse Courriel", "Montant Don", "Nombre Cartes"))
         pt.add_rows(self.commande)
         if input("La commande est-elle valide?\n{}\n".format(pt)).lower() in GestionnaireCarte.OUI:
+            
+            print("Création des carte en format pdf")
+            retour_commandes = PdfCreator.gestionnaire_commande(
+                self.commande, self.base_données)
+
+            print("Envois des courriels")
+            self.email_sender = EmailSender()
+            for retour_commande in retour_commandes:
+                self.email_sender.envoyer_email(retour_commande)
+            self.archiver_comande()
+            print("Envois Complété")
+            
             # Faire un enregistrement de sauvegarde
             chemin_splité = GestionnaireCarte.CHEMIN_SAUVEGARDE.split(".")
             with open(f"{chemin_splité[0]}_{self.date}.{chemin_splité[1]}", "wb") as f:
@@ -62,17 +78,7 @@ class GestionnaireCarte:
         else:
             print("Commande annulée")
             return
-
-        print("Création des carte en format pdf")
-        retour_commandes = PdfCreator.gestionnaire_commande(
-            self.commande, self.base_données)
-
-        self.email_sender = EmailSender()
-        for retour_commande in retour_commandes:
-            self.email_sender.envoyer_email(retour_commande)
-        self.archiver_comande()
-        print("Envois Complété")
-
+    
     def ajout_cartes(self, commande, nombre_cartes):
         for i in range(nombre_cartes):
             self.base_données.append(
@@ -97,13 +103,16 @@ class GestionnaireCarte:
         self.ajout_cartes(commande, nombre_cartes)
         return True
 
+    def ouvrir_fichier_commande(self)-> pd.DataFrame:
+        return pd.read_csv(
+            f"{self.__dossier_csv}/{self.__fichier_csv_commande}")
+
     def lecture_csv_entre(self):
         # Ouvrir le fichier csv
-        self.__dossier_csv = "commande"
+
         self.__fichier_csv_commande = "commande.csv"
 
-        commande_csv = pd.read_csv(
-            f"{self.__dossier_csv}/{self.__fichier_csv_commande}")
+        commande_csv = self.ouvrir_fichier_commande()
 
         # Ajouter les commandes
         for i, row in commande_csv.iterrows():
@@ -180,4 +189,8 @@ class GestionnaireCarte:
             raise ValueError("Erreur à déterminer le nombre de cartes")
 
 
-GestionnaireCarte()
+
+if __name__ == "__main__":
+    gestionnaire_cartes = GestionnaireCarte()
+    gestionnaire_cartes.passer_commande()
+

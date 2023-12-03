@@ -10,7 +10,9 @@ class VerificationCartes:
     CHEMIN_SAUVEGARDE = "cartes_crees/base_données_cartes.pkl"
     DEBUG = False
     
+    
     def __init__(self, fichier_numéros="numéro_tirés.json"):
+        top =7
         date = datetime.now().strftime('%Y-%m-%d')
         # Ouvrir le fichier de numéros
         with open(fichier_numéros, "r")as f:
@@ -26,9 +28,12 @@ class VerificationCartes:
     
         for entree in self.base_données:
             self.vérification_client(entree)
-        noms, score = list(zip(*sorted(list(self.__ranking.items()),key=lambda x:x[1], reverse=True)))
+        noms, score = list(zip(*sorted(list(self.__ranking.items()),key=lambda x:x[1][0], reverse=True)))
         pd.options.display.float_format = '${:,.2f}'.format
         pd.DataFrame({"Participant":noms,"Nombre numéro gagnant":score}).to_csv(f"Résultats {date}.csv")
+        
+        print("Top {}: \n\t{}".format(top,
+            "\n\t".join([f"{nm}: {100*sc[0]:0.1f}% , {sc[1]}" for nm, sc in zip(noms[0:top], score[0:top])])))
  
     
     def vérification_client(self,entre_bd:Tuple[Commande, CARTE]):
@@ -49,9 +54,9 @@ class VerificationCartes:
             for numéro in numéros ]
         count = numéro_sortis.count(True) 
         try:
-            self.__ranking[nom] = max(self.__ranking[nom],count/len(numéro_sortis))
+            self.__ranking[nom] = max(self.__ranking[nom],(count/len(numéro_sortis),count), key=lambda x: x[0])
         except KeyError:
-            self.__ranking[nom] = count/len(numéro_sortis)
+            self.__ranking[nom] = (count/len(numéro_sortis),count)
         
         if self.DEBUG:    
            print(f"{nom} a {count} numéro gagnant sur {len(numéro_sortis)}")
