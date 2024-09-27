@@ -5,6 +5,7 @@ from datetime import datetime
 from math import floor
 from random import random
 from typing import cast
+from pathlib import Path
 
 class PdfCreator:
 
@@ -13,9 +14,11 @@ class PdfCreator:
         nombres_cartes = [c.nombre_cartes for c in commandes]
         date = datetime.now().strftime('%Y-%m-%d_%H:%M:%S')
         retours_commandes: List[RetourCommande] = []
+        
+        temp_file_folder = Path("cartes_pdf/creation_carte_pdf")
+        temp_file_folder.mkdir(parents=True, exist_ok=True)
         for i, commande in enumerate(commandes):
-
-            temp_file_name = "cartes_pdf/creation_carte_pdf/_temp.tex"
+            temp_file_name = temp_file_folder/"_temp.tex"
             with open(temp_file_name, "wb") as f:
                 idx_carte = -1*sum(nombres_cartes[i:])
                 if idx_carte == -1*nombres_cartes[i]:

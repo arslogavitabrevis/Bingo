@@ -1,5 +1,5 @@
 from difflib import get_close_matches
-
+import pathlib
 
 class AdresseCourriel:
     
@@ -7,8 +7,12 @@ class AdresseCourriel:
     __DOMAINE_PRINCIPAL = "@domain1.com"
     __DOMAINE_SECONDAIRE = "@domain2.com"
     def __init__(self) -> None:
-        with open(self.__FICHIERLISTECOURRIEL, "r") as f:
-            self.liste_courriels = set([c.lower()[1:-1] for c in f.read().split("\n")])
+        if (pathlib.Path(__file__).parent/self.__FICHIERLISTECOURRIEL).is_file():
+            with open(self.__FICHIERLISTECOURRIEL, "r") as f:
+                self.liste_courriels = set([c.lower()[1:-1] for c in f.read().split("\n")])
+        else:
+            print("Le fichier de liste de botin de courriel n'est pas dispobible")
+            self.liste_courriels = set()
     
     def pattern_adresse_courriel(self, prénom_nom:str):
         try:

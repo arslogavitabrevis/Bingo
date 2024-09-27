@@ -11,23 +11,27 @@ from copy import deepcopy
 import pandas as pd
 import shutil
 from pattern_adresse_courriel import AdresseCourriel
+from pathlib import Path
 
 
 class GestionnaireCarte:
     OUI = {"oui", "yes", "o", "y"}
-    CHEMIN_SAUVEGARDE = "cartes_crees/base_données_cartes.pkl"
 
     def __init__(self) -> None:
         self.commande: COMMANDES = []
         self.date = datetime.now().strftime('%Y-%m-%d_%H:%M:%S')
         # Vérifier si le fichier de base de données de carte existe:
-        if not os.path.isfile(GestionnaireCarte.CHEMIN_SAUVEGARDE):
+        dossier_sauvegarde = Path("cartes_crees")
+        dossier_sauvegarde.mkdir(parents=True, exist_ok=True)
+        self.fichier_sauvegarde = dossier_sauvegarde/"base_données_cartes.pkl"
+        
+        if not os.path.isfile(self.fichier_sauvegarde):
             self.base_données: BASE_DONNE = []
             self.liste_commandes_précédentes: List[Commande] = []
             liste_cartes: List[CARTE] = []
         else:
             # Ouvrir la base de données des cartes sauvegardées
-            with open(GestionnaireCarte.CHEMIN_SAUVEGARDE, "rb") as f:
+            with open(self.fichier_sauvegarde, "rb") as f:
                 self.base_données: BASE_DONNE = pickle.load(f)
             self.liste_commandes_précédentes, liste_cartes = zip(*self.base_données)
             clients = set(
@@ -69,10 +73,9 @@ class GestionnaireCarte:
             print("Envois Complété")
             
             # Faire un enregistrement de sauvegarde
-            chemin_splité = GestionnaireCarte.CHEMIN_SAUVEGARDE.split(".")
-            with open(f"{chemin_splité[0]}_{self.date}.{chemin_splité[1]}", "wb") as f:
+            with open(f"{self.fichier_sauvegarde.stem}_{self.date}.{self.fichier_sauvegarde.suffix}", "wb") as f:
                 pickle.dump(self.base_données, f)
-            with open(GestionnaireCarte.CHEMIN_SAUVEGARDE, "wb") as f:
+            with open(self.fichier_sauvegarde, "wb") as f:
                 pickle.dump(self.base_données, f)
             print("Commande sauvegardée")
         else:
