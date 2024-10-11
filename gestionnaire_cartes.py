@@ -47,6 +47,7 @@ class GestionnaireCarte:
         
         # Charger la liste des email:
         self.touver_courriel = AdresseCourriel()
+        
         # Partie pour faire des demande de carte manuellement
         # while self.demande_cartes_manuel():
         #     print("Les cartes seront générées seulement à la fin")
@@ -139,9 +140,9 @@ class GestionnaireCarte:
 
     def archiver_comande(self):
         # Sauvegarder le document
-        chemin_splité = self.__fichier_csv_commande.split(".")[0]
-        toute_les_commandes = f"{self.__dossier_csv}/archive/toute_les_commandes.csv"
+        toute_les_commandes = Path(f"{self.__dossier_csv}/archive/toute_les_commandes.csv")
         if not os.path.isfile(toute_les_commandes):
+            toute_les_commandes.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy(f"{self.__dossier_csv}/modele.csv",
                         toute_les_commandes)
 
@@ -154,7 +155,7 @@ class GestionnaireCarte:
         print(f"Le montant total amassé est de {montant_total} $.")
 
         os.rename(f"{self.__dossier_csv}/{self.__fichier_csv_commande}",
-                  f"{self.__dossier_csv}/archive/{chemin_splité}{self.date}.csv")
+                  f"{self.__dossier_csv}/archive/{Path(self.__fichier_csv_commande).stem}{self.date}.csv")
 
         nouvelle_bd.to_csv(toute_les_commandes)
         shutil.copy(toute_les_commandes,

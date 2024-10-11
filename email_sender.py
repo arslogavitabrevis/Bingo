@@ -9,8 +9,8 @@ class EmailSender:
         with open(fichier_parametres, "r")as f:
             param: Dict = json.load(f)
             
-        self.__courriel_reference = param["courriel_reference"]
-        self.yag = yagmail.SMTP(param["courriel_principal"], param["mot_de_passe"])
+        self.__courriels_references = param["courriels_references"]
+        self.yag = yagmail.SMTP(param["courriel_principal"], oauth2_file='oauth2_creds.json')
 
     def envoyer_email(self, retour_commande: RetourCommande):
         contents = ["""Bonjour {},
@@ -19,7 +19,7 @@ Nous vous remercions pour votre don de {} $ à la campagne Entraide. Vous trouve
 
 Bonne chance!
 
-L\'équipe du Bingo Énergi-sant, Claudia Dupont, Josélie Bégin, Julie Poulin, Maude Grenier-Hamel, Raphaël Grenier""".format(
+L\'équipe du Bingo Énergi-sant, Claudia Dupont, Josélie Bégin, Julie Poulin, Mathieu Trudelle, Maude Grenier-Hamel, Raphaël Grenier""".format(
             retour_commande.commande.nom_client,
             retour_commande.commande.montant_don,
             retour_commande.commande.nombre_cartes,
@@ -28,6 +28,6 @@ L\'équipe du Bingo Énergi-sant, Claudia Dupont, Josélie Bégin, Julie Poulin,
                     if adr != ""]
         self.yag.send(to=adresses,
                       subject='Vos cartes de bingo Énergi-sant!',
-                      cc=[self.__courriel_reference],
+                      cc=self.__courriels_references,
                       contents=contents,
                       attachments=retour_commande.fichier_pdf)
