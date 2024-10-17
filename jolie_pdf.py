@@ -7,6 +7,7 @@ from random import random
 from typing import cast
 from pathlib import Path
 
+
 class PdfCreator:
 
     @classmethod
@@ -14,7 +15,7 @@ class PdfCreator:
         nombres_cartes = [c.nombre_cartes for c in commandes]
         date = datetime.now().strftime('%Y-%m-%d_%H:%M:%S')
         retours_commandes: List[RetourCommande] = []
-        
+
         temp_file_folder = Path("cartes_pdf/creation_carte_pdf")
         temp_file_folder.mkdir(parents=True, exist_ok=True)
         for i, commande in enumerate(commandes):
@@ -49,7 +50,7 @@ class PdfCreator:
                 "Nombre de carte incorrect dans la base de donnée simplifiée")
 
         commandes, cartes = zip(*base_donnée)
-        
+
         noms_clients = [c.nom_client for c in cast(List[Commande], commandes)]
         if len(noms_clients) != 1 or nom_client not in noms_clients:
             ValueError(

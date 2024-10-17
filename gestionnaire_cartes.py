@@ -34,12 +34,17 @@ class GestionnaireCarte:
             with open(self.fichier_sauvegarde, "rb") as f:
                 self.base_données: BASE_DONNE = pickle.load(f)
             self.liste_commandes_précédentes, liste_cartes = zip(*self.base_données)
-            clients = set(
-                [commande_précédente.nom_client for commande_précédente in self.liste_commandes_précédentes])
+            clients = {commande_précédente.nom_client 
+                 for commande_précédente in self.liste_commandes_précédentes}
             print(f"Il y a actuellement {len(clients)} clients.")
             print(f"Il y a actuellement {len(liste_cartes)} cartes de bingo")
         self.set_cartes = set(liste_cartes)
 
+        # Ajouter une set de carte ou l'ordre ne compte pas 
+        # pour ne pas avoir deux cartes pleines identiques
+        self.set_cartes_sans_ordre ={CreateurCarte.carte_sans_ordre(carte) 
+                                     for carte in self.set_cartes}
+        
         print("Bienvenu dans le créateur de cartes.\n")
 
         # Définir  le nom du dossier pour les cartes
@@ -74,7 +79,7 @@ class GestionnaireCarte:
             print("Envois Complété")
             
             # Faire un enregistrement de sauvegarde
-            with open(f"{self.fichier_sauvegarde.stem}_{self.date}.{self.fichier_sauvegarde.suffix}", "wb") as f:
+            with open(self.fichier_sauvegarde.parent/f"{self.fichier_sauvegarde.stem}_{self.date}{self.fichier_sauvegarde.suffix}", "wb") as f:
                 pickle.dump(self.base_données, f)
             with open(self.fichier_sauvegarde, "wb") as f:
                 pickle.dump(self.base_données, f)
@@ -86,7 +91,7 @@ class GestionnaireCarte:
     def ajout_cartes(self, commande, nombre_cartes):
         for i in range(nombre_cartes):
             self.base_données.append(
-                (commande, CreateurCarte.nouvelle_carte(self.set_cartes)))
+                (commande, CreateurCarte.nouvelle_carte(self.set_cartes, self.set_cartes_sans_ordre)))
 
     def demande_cartes_manuel(self):
         """Gestion d'une commande individuelle de carte"""
@@ -157,7 +162,7 @@ class GestionnaireCarte:
         os.rename(f"{self.__dossier_csv}/{self.__fichier_csv_commande}",
                   f"{self.__dossier_csv}/archive/{Path(self.__fichier_csv_commande).stem}{self.date}.csv")
 
-        nouvelle_bd.to_csv(toute_les_commandes)
+        nouvelle_bd.to_csv(toute_les_commandes,index=False)
         shutil.copy(toute_les_commandes,
                     f"{self.__dossier_csv}/archive/toute_les_commandes{self.date}.csv")
 

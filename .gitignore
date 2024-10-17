@@ -8,3 +8,9 @@ commande/archive/*.csv
 cartes_pdf/creation_carte_pdf/_temp.tex
 base_données_cartes_*.pkl
 cartes_crees/base_données_cartes.pkl
+cartes_pdf/creation_carte_pdf/_temp.log
+cartes_pdf/creation_carte_pdf/_temp.pdf
+cartes_pdf/creation_carte_pdf/_temp.fls
+cartes_pdf/creation_carte_pdf/_temp.synctex.gz
+cartes_pdf/creation_carte_pdf/_temp.fdb_latexmk
+cartes_pdf/creation_carte_pdf/_temp.aux

@@ -5,10 +5,10 @@ from custom_types import CARTE
 class CreateurCarte:   
 
     @classmethod
-    def nouvelle_carte(cls, base_donnes:Set[CARTE]):
+    def nouvelle_carte(cls, base_donnes:Set[CARTE],base_donnes_sans_ordre: Set[Set[int]]):
         for i in range(1000):
             nouvelle_carte = cls._creer_carte()
-            if  cls.verifier_si_carte_existante(base_donnes, nouvelle_carte):
+            if  cls.verifier_si_carte_existante(base_donnes, base_donnes_sans_ordre, nouvelle_carte):
                 return nouvelle_carte
         raise ValueError("Nombre d'essaie pour la création d'une nouvelle carte dépassé")
             
@@ -29,6 +29,14 @@ class CreateurCarte:
         return tuple(pool.pop(round((len(pool)-1)*random())) for i in range(number_of_number))
     
     @staticmethod
-    def verifier_si_carte_existante(base_donnees:Set[CARTE], nouvelle_carte:CARTE):
-        return not nouvelle_carte in base_donnees
+    def verifier_si_carte_existante(base_donnees:Set[CARTE],
+                                    base_donnes_sans_ordre:Set[Set[int]], nouvelle_carte:CARTE):
+        return (not nouvelle_carte in base_donnees 
+                or CreateurCarte.carte_sans_ordre(nouvelle_carte) in base_donnes_sans_ordre)
+    
+    @staticmethod
+    def carte_sans_ordre(carte:CARTE)->Set[int]:
+        return frozenset(chiffre 
+                for __lettre,colonne in carte
+                for chiffre in colonne)
 

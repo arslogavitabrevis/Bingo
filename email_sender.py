@@ -8,9 +8,10 @@ class EmailSender:
     def __init__(self, fichier_parametres="email_sender_param.json"):
         with open(fichier_parametres, "r")as f:
             param: Dict = json.load(f)
-            
+
         self.__courriels_references = param["courriels_references"]
-        self.yag = yagmail.SMTP(param["courriel_principal"], oauth2_file='oauth2_creds.json')
+        self.yag = yagmail.SMTP(
+            param["courriel_principal"], oauth2_file='oauth2_creds.json')
 
     def envoyer_email(self, retour_commande: RetourCommande):
         contents = ["""Bonjour {},

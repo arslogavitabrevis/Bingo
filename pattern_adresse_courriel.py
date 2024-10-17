@@ -4,14 +4,14 @@ import pathlib
 class AdresseCourriel:
     
     __FICHIERLISTECOURRIEL = "liste_courriel.csv"
-    __DOMAINE_PRINCIPAL = "@domain1.com"
-    __DOMAINE_SECONDAIRE = "@domain2.com"
+    __DOMAINE_COURRIEL = "@economie.gouv.qc.ca"
+
     def __init__(self) -> None:
         if (pathlib.Path(__file__).parent/self.__FICHIERLISTECOURRIEL).is_file():
             with open(self.__FICHIERLISTECOURRIEL, "r") as f:
                 self.liste_courriels = set([c.lower()[1:-1] for c in f.read().split("\n")])
         else:
-            print("Le fichier de liste de botin de courriel n'est pas dispobible")
+            print("Le fichier de liste de botin de courriel n'est pas disponible")
             self.liste_courriels = set()
     
     def pattern_adresse_courriel(self, prénom_nom:str):
@@ -19,11 +19,16 @@ class AdresseCourriel:
             prénom,nom = prénom_nom.split(" ")
         except ValueError:
             raise ValueError(f"Nom de famille composé pour {prénom_nom}")
-        return f"{self.__pattern_economie(prénom, nom)};{prénom.lower()}.{nom.lower()}{self.__DOMAINE_SECONDAIRE};"
+        return f"{self.__pattern_economie(prénom, nom)};"
 
     def __pattern_economie(self, prénom:str, nom:str):
-        essaie = f"{prénom.lower()}.{nom.lower()}{self.__DOMAINE_PRINCIPAL}"
-        if essaie not in self.liste_courriels:
+        essaie = f"{prénom.lower()}.{nom.lower()}{self.__DOMAINE_COURRIEL}"
+        if list(self.liste_courriels).count(essaie) != 1:
+           if len(self.liste_courriels) == 0:
+               Warning("Liste de courriel vide, les courriels pourrait être envoyé à des adresses non valides.")
+               print("\tAdresse supposée:{}".format(essaie))
+               if input("\tEnvoyer quand même? (Oui/Non) ") =="Oui":
+                   return essaie
            match = get_close_matches(essaie, self.liste_courriels)
            if len(match) == 0:
                raise ValueError(f"Aucune adresse courriel correspondante pour {prénom} {nom}")
