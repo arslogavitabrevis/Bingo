@@ -3,3 +3,8 @@ __pycache__/carte_bingo.cpython-310.pyc
 __pycache__/custom_types.cpython-310.pyc
 __pycache__/email_sender.cpython-310.pyc
 __pycache__/jolie_pdf.cpython-310.pyc
+cartes_pdf/*.pdf
+commande/archive/*.csv
+cartes_pdf/creation_carte_pdf/_temp.tex
+base_données_cartes_*.pkl
+cartes_crees/base_données_cartes.pkl
