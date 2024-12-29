@@ -1,4 +1,4 @@
 {
-    "courriel_principal": "jobin@email.com",
-    "courriels_references": ["personne_en_cc@email.com","personne2_en_cc@email.com"]
+    "courriel_principal": "courriel_d'envois@gmail.com",
+    "courriels_references": ["personne_en_cc@email.com", "personne2_en_cc@email.com"]
 }
