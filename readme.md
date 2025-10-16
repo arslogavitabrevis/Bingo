@@ -9,10 +9,9 @@ Ces scripts permet d'envoyer par yagmail des cartes de bingo généré automatiq
 
 Les instructions pour l'installation des dépendances peuvent être trouvé en ligne. 
 
-Python >=3.11
-pdflatex (et ses dépendances)
-TODO: compléter
-...
+- Python >=3.11
+- pdflatex (et ses dépendances voir (https://gist.github.com/rain1024/98dd5e2c6c8c28f9ea9d)
+- Normalement toutes les autres dépendances devrait être intallé dans l'environnement virtuel compris dans le répertoire...
 
 ## Utilisation
 
