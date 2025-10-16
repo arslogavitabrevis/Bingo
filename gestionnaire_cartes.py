@@ -148,7 +148,7 @@ class GestionnaireCarte:
             shutil.copy(f"{self.__dossier_csv}/modele.csv",
                         toute_les_commandes)
 
-        bd_csv_commandes = pd.read_csv(toute_les_commandes)
+        bd_csv_commandes = pd.read_csv(toute_les_commandes, index_col=False)
 
         commande_csv = pd.read_csv(
             f"{self.__dossier_csv}/{self.__fichier_csv_commande}")
