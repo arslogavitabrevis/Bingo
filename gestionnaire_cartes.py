@@ -114,7 +114,7 @@ class GestionnaireCarte:
 
     def ouvrir_fichier_commande(self)-> pd.DataFrame:
         return pd.read_csv(
-            f"{self.__dossier_csv}/{self.__fichier_csv_commande}")
+            f"{self.__dossier_csv}/{self.__fichier_csv_commande}",delimiter=",",index_col=False)
 
     def lecture_csv_entre(self):
         # Ouvrir le fichier csv
@@ -134,7 +134,10 @@ class GestionnaireCarte:
                     nom_participant = nom_participant.replace(c, "e")                    
                  
             montant_don = row["Montant don"]
-            adresse_courriel = self.touver_courriel.pattern_adresse_courriel(nom_participant)
+            if not pd.isna(row["courriel"]):
+                adresse_courriel = row["courriel"]
+            else:
+                adresse_courriel = self.touver_courriel.pattern_adresse_courriel(nom_participant)
             nombre_cartes = self.conversion_don_nombre_cartes(montant_don)
             commande = Commande(nom_client=nom_participant,
                                 adressse_courriel=adresse_courriel,
