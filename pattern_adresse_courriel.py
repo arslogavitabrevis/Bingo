@@ -15,6 +15,11 @@ class AdresseCourriel:
             self.liste_courriels = set()
     
     def pattern_adresse_courriel(self, prénom_nom:str):
+        #Enlever les accents pour éviter que ça crée des bug à l'envois du courriel
+        for c in "éÉÈèëËêÊ":
+            if c in nom_participant:
+                print(f"Le caractère {c} a été enlevé du nom {nom_participant}")
+                nom_participant = " ".join([n.capitalize() for n in nom_participant.replace(c, "e").split(" ")])  
         try:
             prénom,nom = prénom_nom.split(" ")
         except ValueError:

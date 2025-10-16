@@ -127,12 +127,6 @@ class GestionnaireCarte:
         for i, row in commande_csv.iterrows():
             nom_participant:str = row["Nom client"]
             
-            #Enlever les accents pour éviter que ça crée des bug à l'envois du courriel
-            for c in "éÉÈèëËêÊ":
-                if c in nom_participant:
-                    print(f"Le caractère {c} a été enlevé du nom {nom_participant}")
-                    nom_participant = nom_participant.replace(c, "e")                    
-                 
             montant_don = row["Montant don"]
             if not pd.isna(row["courriel"]):
                 adresse_courriel = row["courriel"]
